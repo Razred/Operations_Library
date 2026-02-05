@@ -12,7 +12,10 @@ int32_t add(int32_t a, int32_t b) {
 }
 
 int32_t sub(int32_t a, int32_t b) {
-    return add(a, b * -1);
+
+    if (b == INT32_MIN) return INT32_MAX;
+
+    return add(a, -b);
 }
 
 int32_t mul(int32_t a, int32_t b) {
