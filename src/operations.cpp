@@ -1,67 +1,88 @@
 #include "../include/operations.hpp"
 
-int32_t add(int32_t a, int32_t b) {
-    if (a > 0 && b > 0 && a > INT32_MAX - b) {
-        return INT32_MAX;
+#include <limits.h>
+
+namespace operations {
+
+namespace {
+
+inline bool setAllRight(OperationalStatus &status) {
+    status = OperationalStatus::AllRight;
+    return true;
+}
+
+inline bool setError(OperationalStatus &status, OperationalStatus code) {
+    status = code;
+    return false;
+}
+
+}  //namespace
+
+bool add(int64_t a, int64_t b, int64_t &result, OperationalStatus &status) {
+    if ((b > 0 && a > INT64_MAX - b) || (b < 0 && a < INT64_MIN - b)) return setError(status, OperationalStatus::Overflow);
+
+    result = a + b;
+    return setAllRight(status);
+}
+
+bool sub(int64_t a, int64_t b, int64_t &result, OperationalStatus &status) {
+    if ((b < 0 && a > INT64_MAX + b) || (b > 0 && a < INT64_MIN + b)) return setError(status, OperationalStatus::Overflow);
+
+    result = a - b;
+    return setAllRight(status);
+}
+
+bool mul(int64_t a, int64_t b, int64_t &result, OperationalStatus &status) {
+    if (a == 0 || b == 0) {
+        result = 0;
+        return setAllRight(status);
     }
-    else if (a < 0 && b < 0 && a < INT32_MIN - b) {
-        return INT32_MIN;
-    }
+
+    if (a == -1 && b == INT64_MIN) return setError(status, OperationalStatus::Overflow);
+    if (b == -1 && a == INT64_MIN) return setError(status, OperationalStatus::Overflow);
     
-    return a + b;
-}
-
-int32_t sub(int32_t a, int32_t b) {
-
-    if (b == INT32_MIN) return INT32_MAX;
-
-    return add(a, -b);
-}
-
-int32_t mul(int32_t a, int32_t b) {
-    if (a == INT32_MIN && b == -1 || b == INT32_MIN && a == -1) {
-        return INT32_MAX;
-    }
-
-    if (a > 0) {
-        if (b > 0 && a > INT32_MAX / b) return INT32_MAX;
-        else if (b < 0 && b < INT32_MIN / a) return INT32_MIN;
+    int64_t tmp = a * b;
+    if (tmp / b != a) return setError(status, OperationalStatus::Overflow);
     
-    }
-    else if (a < 0) {
-        if (b > 0 && a < INT32_MIN / b) return INT32_MIN;
-        else if (b < 0 && b > INT32_MAX / a) return INT32_MAX;
-    }
-
-    return a * b;
+    result = tmp;
+    return setAllRight(status);
 }
 
-int32_t del(int32_t a, int32_t b) {
-    if (b == 0) { 
-        printf("Incorrect operation: division by zero");
-        exit(1);
+bool div(int64_t a, int64_t b, int64_t &result, OperationalStatus &status) {
+    if (b == 0) return setError(status, OperationalStatus::DivisionByZero);
+
+    if (a == INT64_MIN && b == -1) return setError(status, OperationalStatus::Overflow);
+
+    result = a / b;
+    return setAllRight(status);
+}
+
+bool pow(int64_t a, int64_t b, int64_t &result, OperationalStatus &status) {
+    if (b < 0) return setError(status, OperationalStatus::ValidationError);
+
+    int64_t res = 1;
+    for (int64_t i = 0; i < b; ++i) {
+        int64_t tmp = 0;
+        if (!mul(res, a, tmp, status)) return false;  //mul уже ставит Overflow
+        res = tmp;
     }
-    if (a == INT32_MIN && b == -1) return INT32_MAX;
 
-    return a / b;
+    result = res;
+    return setAllRight(status);
 }
 
-int32_t pow(int32_t a, int32_t b) {
-    if (b <= 0) return 1;
-    int32_t result = a;
-
-    for (int32_t i = 0; i < b - 1; ++i) {
-        result = mul(result, a);
-        if (result == INT32_MAX) return INT32_MAX;
-        else if (result == INT32_MIN) return INT32_MIN;
+bool fact(uint64_t a, uint64_t &result, OperationalStatus &status) {
+    if (a <= 1) {
+        result = 1;
+        return setAllRight(status);
     }
 
-    return result;
+    uint64_t prev = 0;
+    if (!fact(a - 1, prev, status)) return false;
+
+    if (prev > UINT64_MAX / a) return setError(status, OperationalStatus::Overflow);
+    result = prev * a;
+    return setAllRight(status);
 }
 
-int32_t fact(int32_t a) {
-    if (a <= 1) return 1;
-    int32_t result = mul(a, fact(a - 1));
-
-    return result;
-}
+}  //namespace operations
