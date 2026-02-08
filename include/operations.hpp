@@ -4,23 +4,28 @@
 #include <cstdio>
 #include <stdlib.h>
 
-int32_t add(int32_t a, int32_t b);
+namespace operations {
 
-int32_t sub(int32_t a, int32_t b);
-
-int32_t mul(int32_t a, int32_t b);
-
-int32_t del(int32_t a, int32_t b);
-
-int32_t pow(int32_t a, int32_t b);
-
-int32_t fact(int32_t a);
-
+enum class OperationalStatus : uint8_t {
+    AllRight = 0,
+    ParseError,
+    ValidationError,
+    UnsupportedOperation,
+    DivisionByZero,
+    Overflow
+};
 
 
+bool add(int64_t a, int64_t b, int64_t &result, OperationalStatus &status);
 
+bool sub(int64_t a, int64_t b, int64_t &result, OperationalStatus &status);
 
+bool mul(int64_t a, int64_t b, int64_t &result, OperationalStatus &status);
 
+bool div(int64_t a, int64_t b, int64_t &result, OperationalStatus &status);
 
+bool pow(int64_t a, int64_t b, int64_t &result, OperationalStatus &status);
 
+bool fact(int64_t a, int64_t &result, OperationalStatus &status);
 
+}

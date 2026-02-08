@@ -28,10 +28,10 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
     DESTINATION include
 )
 
-add_custom_target(format
+add_custom_target(operations_format
     COMMAND clang-format -i
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/operations.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/include/operations.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/operations.cpp
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running clang-format"
 )
